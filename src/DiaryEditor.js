@@ -20,12 +20,14 @@ const DiaryEditor = ({ onCreate }) => {
   const handleSubmit = () => {
     if (state.author.length < 1) {
       // focus 추가
+      alert("저자는 1글자 이상 입력해 주세요.");
       authorInput.current.focus();
       return;
     }
 
     if (state.content.length < 5) {
       // focus
+      alert("내용은 5글자 이상 입력해주세요.");
       contentInput.current.focus();
       return;
     }
