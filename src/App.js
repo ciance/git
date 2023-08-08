@@ -1,8 +1,7 @@
-import { useCallback, useMemo, useReducer, useRef } from "react";
+import React, { useCallback, useMemo, useReducer, useRef } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
-//import TestReactPlayer from "./TestReactPlayer";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -29,9 +28,11 @@ const reducer = (state, action) => {
       return state;
   }
 };
-const App = () => {
-  //const [data, setData] = useState([]);
 
+export const DiaryStateContext = React.createContext(); //only data
+export const DiaryDispatchContext = React.createContext();
+
+const App = () => {
   const [data, dispatchTest] = useReducer(reducer, []);
 
   const dataId = useRef(0);
@@ -55,6 +56,10 @@ const App = () => {
     dispatchTest({ type: "EDIT", targetId, newContent });
   }, []);
 
+  const memoizedDispatches = useMemo(() => {
+    return { onCreate, onDelete, onEdit };
+  }, []);
+
   const getDiaryAnalysis = useMemo(() => {
     const goodCount = data.filter((it) => it.emotion >= 3).length;
     const badCount = data.length - goodCount;
@@ -65,19 +70,18 @@ const App = () => {
   const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
 
   return (
-    <div height={"700px"}>
-      <DiaryEditor onCreate={onCreate} />
-      <div> 전체 일기 : {data.length} </div>
-      <div> 기분 좋은 일기 개수 : {goodCount}</div>
-      <div> 기분 나쁜 일기 개수 : {badCount} </div>
-      <div> 기분 좋은 일기 비율 : {goodRatio}</div>
-      <DiaryList onDelete={onDelete} diaryList={data} onEdit={onEdit} />
-      {/* {isWindow && (
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={memoizedDispatches}>
         <div height={"700px"}>
-          <TestReactPlayer url="https://www.youtube.com/watch?v=AJsvGtGgI6M" />
+          <DiaryEditor />
+          <div> 전체 일기 : {data.length} </div>
+          <div> 기분 좋은 일기 개수 : {goodCount}</div>
+          <div> 기분 나쁜 일기 개수 : {badCount} </div>
+          <div> 기분 좋은 일기 비율 : {goodRatio}</div>
+          <DiaryList />
         </div>
-      )} */}
-    </div>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
   );
 };
 
